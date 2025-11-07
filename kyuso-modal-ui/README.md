@@ -1,73 +1,63 @@
-# React + TypeScript + Vite
+# QSO Wallet Connect - OAuth Modal UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React-based OAuth login modal that works as a popup window for seamless authentication.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Clean Modal Design** - Minimal, responsive UI with rounded corners
+- **OAuth Providers** - Google and GitHub login via Supabase
+- **Popup Behavior** - Opens as popup window, posts results to parent
+- **PKCE Support** - Secure OAuth2 flow with code challenge
 
-## React Compiler
+## Usage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### As Popup Window
 
-## Expanding the ESLint configuration
+```javascript
+// Open popup from your main application
+const popup = window.open(
+  'http://localhost:5173?client_id=your_client_id&redirect_uri=http://localhost:3000/callback&code_challenge=xyz&state=abc',
+  'oauth',
+  'width=400,height=600'
+)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+// Listen for auth result
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'OAUTH_RESULT') {
+    console.log('Auth code:', event.data.code)
+    // Exchange code for tokens with your backend
+  }
+})
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Using Utility Functions
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```javascript
+import { openOAuthPopup } from './utils/oauth'
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+const result = await openOAuthPopup({
+  clientId: 'your_client_id',
+  redirectUri: 'http://localhost:3000/callback',
+  authServerUrl: 'http://localhost:5173'
+})
+
+if (result.code) {
+  // Exchange code for access token
+}
 ```
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Routes
+
+- `/` - Main login modal
+- `/popup-complete` - Handles OAuth callback and posts result to parent
+
+## Integration
+
+This modal integrates with the kyuso-auth-server backend for complete OAuth2 flow with Google/GitHub authentication via Supabase.
