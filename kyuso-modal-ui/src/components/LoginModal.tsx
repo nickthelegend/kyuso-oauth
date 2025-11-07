@@ -44,7 +44,7 @@ export default function LoginModal() {
     <div className="modal-container">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>Connect QSO Wallet</h2>
+          <h2>Connect Kyuso Wallet</h2>
           <p>Choose your preferred login method</p>
         </div>
         

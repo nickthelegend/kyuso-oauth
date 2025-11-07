@@ -43,7 +43,7 @@ try {
 const start = async () => {
   try {
     const port = process.env.PORT || 3001
-    await fastify.listen({ port, host: '0.0.0.0' })
+    await fastify.listen({ port, host: '127.0.0.1' })
     console.log(`kyuso Auth Server running on port ${port}`)
   } catch (err) {
     fastify.log.error(err)

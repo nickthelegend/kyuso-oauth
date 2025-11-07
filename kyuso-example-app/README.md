@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# QSO Wallet Example App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Example application demonstrating how to integrate the QSO Wallet OAuth modal.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. **Start the OAuth Server:**
+   ```bash
+   cd ../kyuso-auth-server
+   npm install
+   npm run dev  # Port 3001
+   ```
 
-## React Compiler
+2. **Start the OAuth Modal:**
+   ```bash
+   cd ../kyuso-modal-ui
+   npm install
+   npm run dev  # Port 5173
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+3. **Register OAuth Client:**
+   ```bash
+   curl -X POST http://localhost:3001/clients \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Example App", "redirect_uri": "http://localhost:5174/callback"}'
+   ```
 
-## Expanding the ESLint configuration
+4. **Update Client ID:**
+   - Copy the `client_id` from step 3
+   - Update `CLIENT_ID` in `src/App.tsx`
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+5. **Start Example App:**
+   ```bash
+   npm install
+   npm run dev  # Port 5174
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## How It Works
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. **Click "Connect QSO Wallet"** → Opens OAuth modal popup
+2. **Choose Google/GitHub** → Authenticates via Supabase
+3. **Modal posts auth code** → Back to parent window
+4. **Exchange code for tokens** → Get access token
+5. **Fetch user info** → Display user profile
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Integration Code
+
+```javascript
+// Open OAuth modal
+const popup = window.open(modalUrl, 'oauth', 'width=400,height=600')
+
+// Listen for auth result
+window.addEventListener('message', (event) => {
+  if (event.data?.type === 'OAUTH_RESULT') {
+    // Exchange code for tokens
+    exchangeCodeForToken(event.data.code)
+  }
+})
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This demonstrates the complete Magic.link-style OAuth flow with popup authentication.
