@@ -9,7 +9,7 @@ interface User {
 
 const OAUTH_MODAL_URL = 'http://localhost:5173'
 const AUTH_SERVER_URL = 'http://localhost:3001'
-const CLIENT_ID = 'your_client_id' // Replace with actual client ID
+const CLIENT_ID = 'a40f69c28a6688d2afa41f7477f51db9' // Replace with actual client ID
 const REDIRECT_URI = 'http://localhost:5174/callback'
 
 function App() {
